@@ -16,10 +16,12 @@
 	<?php 
 	require_once('pclzip.lib.php');	
 	
+	session_start();
+	
+	
 	
 	$photoarray = array('readme.txt');
-	$userid = "";
-	
+
 	/*Exportagram
 	$clientid = "5e31a29af73348a1895f12e8089ffe60";
 	$clientsecret = "3f18070c73974bc48b69aa608b65f44a";
@@ -31,53 +33,32 @@
 	$clientid = "66cc00bdc3b3426994c777b70e239f79";
 	$clientsecret = "8b0c0600578f4402963c22f27a9baef1";
 	$website_url = "http://export.steveottenad.com";
-	$redirect_url = "http://export.steveottenad.com/export/";
+	$redirect_url = "http://export.steveottenad.com/";
+	print_r($_SESSION);
+	if(isset($_SESSION['instagramuser']) && !isset($_SESSION['downloadurl'])){
+		getPhotos();
 		
-	$downloadurl = "";
-	$username = "";
-	if ( isset( $_GET['code'] )){
-		$code = $_GET['code'];
-		$curl = curl_init();
-		curl_setopt_array($curl, array(
-			CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_URL => 'https://api.instagram.com/oauth/access_token',
-			CURLOPT_POST => 1,
-			CURLOPT_POSTFIELDS => array(
-				'client_id' => $clientid,
-				'client_secret' => $clientsecret,
-				'grant_type' => 'authorization_code',
-				'redirect_uri' => $redirect_url,
-				'code' => $code
-			)
-		));
-		$resp = curl_exec($curl);
-		curl_close($curl);
-		
-		$json = json_decode( $resp, true );
-		$token = "";
-		$id = 0;
-		
-		if( isset($json['access_token'])){
-			//echo($json['user']['username']."<br/><br/>");
-			$GLOBALS['username'] = $json['user']['username'];
-			$token = $json['access_token'];
-			$id = $json['user']['id'];
-			$GLOBALS['userid'] = $json['user']['id'];
+	}
+	
+	
+	function getPhotos(){
+		echo 'getPhotos()';
+		if($_SESSION['instagramuser']){
+			$token = $_SESSION['instagramuser']['access_token'];
+			$id = $_SESSION['instagramuser']['user']['id'];
 			$ch = curl_init(); 
-			$url = "https://api.instagram.com/v1/users/".$id."/media/recent?count=1000&access_token=".$token;
+			$url = "https://api.instagram.com/v1/users/".$_SESSION['instagramuser']['user']['id']."/media/recent?count=1000&access_token=".$_SESSION['instagramuser']['access_token'];
 			curl_setopt($ch, CURLOPT_URL, $url); 
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
 			$output = curl_exec($ch); 
 			curl_close($ch);  
 			$results = json_decode( $output, true );
 			
-		
 			if(isset($results['data'])){
 				displayItems($results);
 				moreData($results);
 			}
 		}
-
 	}
 	
 	function moreData($json){
@@ -94,7 +75,7 @@
 			}
 		}else{
 			//We have no more pages, so make the zip.
-			$result = create_zip($GLOBALS['photoarray'], 'zips/instagram-'.$GLOBALS['userid'].'.zip');
+			$result = create_zip($GLOBALS['photoarray'], 'zips/instagram-'.$_SESSION['instagramuser']['user']['id'].'.zip');
 		}
 	}
 	
@@ -113,6 +94,7 @@
 			$readable = is_readable($path);
 			if($readable){
 				unlink($path);
+				$_SESSION['downloadurl'] = "";
 			}
 		}else{
 			 $archive = new PclZip($destination);
@@ -120,7 +102,7 @@
 			  if ($v_list == 0) {
 				die("Error : ".$archive->errorInfo(true));
 			  }
-			  $GLOBALS['downloadurl'] = $website_url.'/'.$destination;
+			  $_SESSION['downloadurl'] = $GLOBALS['website_url'].'/'.$destination;
 		}
 	}
 	
@@ -159,16 +141,26 @@
 	
 	<div class="container">
 		<div class="row">
-			<div class="span5">
-				<p>
-					<?php echo $username ?><br />
-					<a href="<?php echo $GLOBALS['downloadurl'] ?>" class="btn btn-primary"><i class="icon-circle-arrow-down icon-white"> </i> Download your photos</a>
-				</p>
+			<div class="span7">
+				
+				<h5><strong>Username:</strong><?php echo $_SESSION['instagramuser']['user']['username'] ?></h5>
+				<p>	All of your photos have been saved and zipped into one file. Use the download button below to grab your photos</p>
+				<p><a href="<?php echo $_SESSION['downloadurl'] ?>" class="btn btn-primary"><i class="icon-circle-arrow-down icon-white"> </i> Download your photos</a></p>
+				
+			</div>
+			<div class="span2"></div>
+			<div class="span3">
+				<div class="well">
+				<h3>Delete your account?</h3>
+				<p>If you are exporting your photos with the intention of dropping instagram so they cannot sell your photos to advertisers, please use the link below to submit you account removal request.</p>
+				<p><a href="https://instagram.com/accounts/remove/request/" class="btn btn-small btn-danger">Account Removal Form</a></p>
+				</div>
 			</div>
 		</div>
 
 	</div>
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script src="../js/bootstrap.min.js"></script>
+	
 </body>
 </html>
