@@ -1,27 +1,18 @@
 <!doctype html>
 <html>
 <head>
-	<title>Export Your Instagram Photos</title>
-
+	<title>Export/Download Your Instagram Photos | Exportagram </title>
+	<meta name="description" content="Export and Download all of your Instagram photos to your computer. Backup your Instagram account before deleting it." />
 	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
-	<style>
-		.brand{
-			font-family: 'Lobster', cursive;
-		}
-		.row{
-				margin-top:75px;
-		}
-		.hidden{
-			display:none;
-		}
-	</style>
+
 </head>
-<body>	
+<body>
+
+
 	<?php 
 		session_start();
 		//session_destroy();
-		
 		/*Exportagram*/
 		$clientid = "5e31a29af73348a1895f12e8089ffe60";
 		$clientsecret = "3f18070c73974bc48b69aa608b65f44a";
@@ -65,26 +56,20 @@
 			}
 		}
 	?>
-	<div class="navbar navbar-fixed-top">
-	  <div class="navbar-inner">
-		<div class="container">
-		<a class="brand" href="/">Exportagram</a>
-		<div class="pull-right">
-			<ul class="nav">
-				<li><a href="http://steveottenad.com">Steve Ottenad</a></li>
-			</ul>
-		</div>
-	  </div>
-	</div>
+	
+<?php include('nav.php') ?>
 	
 	<div class="container">
 		<div class="row">
 			<div class="span5">
 				<?php if(isset($_SESSION['instagramuser'])){ ?>
-					<p>hello: <?php echo $_SESSION['instagramuser']['user']['username'] ?></p>
+					<h4>Hello: <?php echo $_SESSION['instagramuser']['user']['username'] ?></h4>
 				<?php } ?>
 				<p>This is a downloader. Please click the button, then wait while we fetch all your photos and deliver you a zip file</p>
-				<p>First, connect exportagram to your instagram account, then export</p>
+				<ol>
+					<li>Connect exportagram to your instagram account</li>
+					<li>Download your all your photos in a zip file</li>
+				</ol>
 				<?php if(!isset($_SESSION['instagramuser'])){ ?>
 					<a class="btn btn-primary" href="https://api.instagram.com/oauth/authorize/?client_id=5e31a29af73348a1895f12e8089ffe60&redirect_uri=http://exportagram.com/&response_type=code"><i class="icon-circle-arrow-down icon-white"> </i> Connect to Instagram</a>
 					
@@ -92,30 +77,9 @@
 					<a class="btn btn-primary btn-large" id="export" href="/export/"><i class="icon-circle-arrow-down icon-white"> </i> Export your Images</a>
 					<a class="hidden btn btn-primary btn-large" id="loading"><img src="img/ajax-loader.gif" /> Loading Images...</a>
 				<?php } ?>
+			</div>
 		</div>
 	</div>
-	<script src="http://code.jquery.com/jquery-latest.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script>
-		$(function(){
-			$('#export').click(function(){
-				$(this).hide();
-				$('#loading').show();
-			});
-		});
-	</script>
-	<script type="text/javascript">
-
-	var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', 'UA-37157813-1']);
-	  _gaq.push(['_trackPageview']);
-
-	  (function() {
-		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
-
-	</script>
+<?php include('footer.php') ?>	
 </body>
 </html>

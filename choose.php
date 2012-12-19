@@ -1,23 +1,7 @@
-<!doctype html>
-<html>
-<head>
-	<title>Export Your Instagram Photos | Exportagram </title>
-	<meta name="description" content="Download all of your Instagram photos to your computer. Backup your Instagram account." />
-
-	<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
-	<link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
-
-</head>
-<body>
-
 	<?php 
-	require_once('pclzip.lib.php');	
-	
 	session_start();
-	
-	
-	
-	$photoarray = array('readme.txt');
+		require_once('pclzip.lib.php');	
+
 
 	/*Exportagram*/
 	$clientid = "5e31a29af73348a1895f12e8089ffe60";
@@ -25,23 +9,16 @@
 	$website_url = "http://exportagram.com";
 	$redirect_url = "http://exportagram.com/export/";
 	
-	
-	/*Steveottenad
-	$clientid = "66cc00bdc3b3426994c777b70e239f79";
-	$clientsecret = "8b0c0600578f4402963c22f27a9baef1";
-	$website_url = "http://export.steveottenad.com";
-	$redirect_url = "http://export.steveottenad.com/";
-	//print_r($_SESSION);
-	*/
-	
-	if(isset($_SESSION['instagramuser']) && !isset($_SESSION['downloadurl'])){
+
+	$photoarray = array('readme.txt');
+	$output = "";
+	if(isset($_SESSION['instagramuser'])){
 		getPhotos();
-		
 	}
 	
 	
 	function getPhotos(){
-		echo 'getPhotos()';
+
 		if($_SESSION['instagramuser']){
 			$token = $_SESSION['instagramuser']['access_token'];
 			$id = $_SESSION['instagramuser']['user']['id'];
@@ -82,6 +59,7 @@
 		
 		foreach ( $json['data'] as $photo ){
 			array_push($GLOBALS['photoarray'], 'images/'.$photo['id'].'.jpg');
+			$GLOBALS['output'] .= "<img src".$photo['images']['thumbnail']['url']." /> ";
 			save_image($photo['images']['standard_resolution']['url'], 'images/'.$photo['id'].'.jpg' );		
 		}
 	}
@@ -121,32 +99,43 @@
 			fclose($fp); 
 		}
 	}
-	
-
-	
 	?>
 
-<?php include('nav.php') ?>
+<!doctype html>
+<html>
+<head>
+	<title>Export Your Instagram Photos</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+	<script>
 	
+	</script>
+</head>
+<body>
+
+
+
+	
+<?php include('nav.php') ?>
 	<div class="container">
 		<div class="row">
 			<div class="span7">
 				
-				<h5><strong>Username:</strong><?php echo $_SESSION['instagramuser']['user']['username'] ?></h5>
+
 				<p>	All of your photos have been saved and zipped into one file. Use the download button below to grab your photos</p>
-				<p><a href="<?php echo '/zips/instagram-'.$_SESSION['instagramuser']['user']['id'].'.zip' ?>" class="btn btn-primary"><i class="icon-circle-arrow-down icon-white"> </i> Download your photos</a></p>
+				<p><a href="<?php echo '/zips/instagram-'.$_SESSION['instagramuser']['user']['id'].'.zip' ?>" class="btn btn-primary btn-large"><i class="icon-circle-arrow-down icon-white"> </i> Download your photos</a></p>
 				
 			</div>
-			<div class="span2"></div>
-			<div class="span3">
+			<div class="span1"></div>
+			<div class="span4">
 				<div class="well">
 				<h3>Delete your account?</h3>
 				<p>If you are exporting your photos with the intention of dropping instagram so they cannot sell your photos to advertisers, please use the link below to submit you account removal request.</p>
 				<p><a href="https://instagram.com/accounts/remove/request/" class="btn btn-small btn-danger">Account Removal Form</a></p>
 			</div>
+			<div class="span7"><?php echo $output ?></div>
 		</div>
 	</div>
-
-	<?php include('footer.php') ?>	
+<?php include('footer.php') ?>	
 </body>
 </html>
